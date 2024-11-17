@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Portfolio Platform</title>
+    <link rel="stylesheet" href="/css/style.css"> <!-- Подключение основного файла стилей -->
+</head>
+<body>
+
+<!-- Навигационная панель -->
+<header>
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="/">Главная</a>
+            <ul class="nav-links">
+                <li><a href="/login">Войти</a></li>
+                <li><a href="/register">Регистрация</a></li>
+            </ul>
+        </div>
+    </nav>
+</header>
+
+<!-- Форма для входа -->
+<h1>Вход на платформу</h1>
+
+<!-- Ошибка входа -->
+<% if (typeof errorMessage !== 'undefined') { %>
+    <div class="error-message">
+        <p><%= errorMessage %></p>
+    </div>
+<% } %>
+
+<form action="/login" method="POST" class="form">
+    <label for="username">Username:</label>
+    <input type="text" name="username" required><br>
+
+    <label for="password">Password:</label>
+    <input type="password" name="password" required><br>
+
+    <button type="submit">Войти</button>
+</form>
+
+</body>
+</html>
