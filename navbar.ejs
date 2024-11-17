@@ -1,13 +1,40 @@
-<nav class="navbar">
-    <div class="navbar-container">
-        <a href="/" class="logo">Seoul City Portfolio</a>
-        <ul class="nav-links">
-            <li><a href="/">Home</a></li>
-            <li><a href="/login">Login</a></li>
-            <li><a href="/register">Register</a></li>
-            <% if (user && user.role === 'admin') { %>
-                <li><a href="/admin">Admin Dashboard</a></li>
-            <% } %>
-        </ul>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="icon" href="/favicon.ico">
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <header>
+        <nav class="navbar">
+            <div class="navbar-container">
+                <ul class="nav-links">
+                    <li><a href="/">Главная</a></li>
+                    <li><a href="/portfolio">Портфолио</a></li>
+                    <% if (session.userId) { %> <!-- If the user is logged in -->
+                        <li><a href="/logout">Выход</a></li>
+                    <% } else { %>
+                        <li><a href="/register">Регистрация</a></li>
+                        <li><a href="/login">Войти</a></li>
+                    <% } %>
+                    <!-- Additional Links -->
+                    <li><a href="/finance">Финансы</a></li>
+                    <li><a href="/news">Новости</a></li>
+                    <li><a href="/index">Индекс</a></li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Content of the Page -->
+    <div class="content">
+        <%- body %> <!-- The specific content for each page will be injected here -->
     </div>
-</nav>
+
+    <script src="/js/main.js"></script>
+</body>
+</html>
