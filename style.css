@@ -1,36 +1,95 @@
+/* Общие стили */
 body {
-  font-family: Arial, sans-serif;
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f9;
 }
 
-header {
-  background-color: #333;
-  padding: 10px;
+h1 {
+    text-align: center;
+    color: #333;
 }
 
-header nav ul {
-  display: flex;
-  list-style: none;
-  justify-content: center;
-  margin: 0;
-  padding: 0;
+/* Стили для навигации */
+.navbar {
+    background-color: #2c3e50;
+    padding: 15px 0;
 }
 
-header nav ul li {
-  margin: 0 10px;
+.navbar-container {
+    width: 90%;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
-header nav ul li a {
-  color: white;
-  text-decoration: none;
+.navbar a {
+    color: white;
+    text-decoration: none;
+    padding: 10px 20px;
+    font-size: 18px;
 }
 
-main {
-  padding: 20px;
+.navbar .nav-links {
+    list-style: none;
+    display: flex;
 }
 
-footer {
-  text-align: center;
-  padding: 10px;
-  background-color: #333;
-  color: white;
+.navbar .nav-links li {
+    margin-right: 20px;
+}
+
+/* Карусель для изображений */
+.portfolio-item .carousel {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.portfolio-item .carousel img {
+    width: 30%;
+    height: auto;
+    border-radius: 10px;
+}
+
+/* Стили для портфолио */
+.portfolio {
+    padding: 50px;
+}
+
+.portfolio-items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 30px;
+    justify-content: center;
+}
+
+.portfolio-item {
+    width: 300px;
+    background-color: white;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    padding: 20px;
+    text-align: center;
+}
+
+.portfolio-item h2 {
+    color: #333;
+    font-size: 24px;
+    margin-bottom: 10px;
+}
+
+.portfolio-item p {
+    color: #777;
+    font-size: 16px;
+    margin-bottom: 15px;
+}
+
+.portfolio-item small {
+    display: block;
+    color: #aaa;
+    font-size: 14px;
 }
