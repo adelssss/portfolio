@@ -1,90 +1,117 @@
-const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
+const nodemailer = require('nodemailer');
+const User = require('../models/user'); // Модель пользователя
+const session = require('express-session');
 
-// Модели пользователей (пример)
-const User = require('../models/user'); // Замените на вашу модель пользователя
-const JWT_SECRET = process.env.JWT_SECRET || 'Aa650652';  // Добавьте это в код
+// Function for registering a user
+async function register(req, res) {
+  const { username, password, firstName, lastName, age, gender } = req.body;
 
-// Регистрация нового пользователя
-exports.register = async (req, res) => {
-  const { username, email, password } = req.body;
+  // Check if the user already exists
+  const existingUser = await User.findOne({ username });
+  if (existingUser) {
+    return res.status(400).send('User already exists');
+  }
+
+  // Hash the password
+  const hashedPassword = await bcrypt.hash(password, 10);
+
+  // Create a new user
+  const newUser = new User({
+    username,
+    password: hashedPassword,
+    firstName,
+    lastName,
+    age,
+    gender,
+    role: 'editor', // Default role is editor
+    failedLoginAttempts: 0 // Track failed login attempts
+  });
 
   try {
-    // Проверка, существует ли пользователь
-    let user = await User.findOne({ email });
-    if (user) {
-      return res.status(400).json({ msg: 'Пользователь уже существует' });
-    }
+    await newUser.save();
 
-    // Хеширование пароля
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
-
-    // Создание нового пользователя
-    user = new User({
-      username,
-      email,
-      password: hashedPassword,
+    // Send the welcome email
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
     });
 
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: username,
+      subject: 'Welcome to the Portfolio Platform',
+      text: `Hi ${firstName},\n\nThank you for registering on our portfolio platform!\n\nBest regards,\nPortfolio Team`,
+    };
+
+    transporter.sendMail(mailOptions, (err, info) => {
+      if (err) {
+        console.log(err);
+      } else {
+        console.log('Email sent: ' + info.response);
+      }
+    });
+
+    res.redirect('/login'); // Redirect to login after successful registration
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Error during registration');
+  }
+}
+
+// Login function
+async function login(req, res) {
+  const { username, password } = req.body;
+
+  // Find the user by username
+  const user = await User.findOne({ username });
+  if (!user) {
+    return res.status(400).send('Invalid username or password');
+  }
+
+  // Check for failed login attempts
+  if (user.failedLoginAttempts >= 3) {
+    return res.status(403).send('Your account is locked due to too many failed login attempts');
+  }
+
+  // Compare passwords
+  const isMatch = await bcrypt.compare(password, user.password);
+  if (!isMatch) {
+    // Increment failed login attempts
+    user.failedLoginAttempts += 1;
     await user.save();
 
-    // Генерация JWT токена
-    const payload = {
-      user: {
-        id: user.id,
-      },
-    };
-    const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '1h' });
-
-    res.json({ token });
-
-  } catch (err) {
-    console.error(err.message);
-    res.status(500).send('Ошибка сервера');
+    return res.status(400).send('Invalid username or password');
   }
-};
 
-// Вход пользователя
-exports.login = async (req, res) => {
-  const { email, password } = req.body;
+  // Reset failed login attempts on successful login
+  user.failedLoginAttempts = 0;
+  await user.save();
 
-  try {
-    // Проверка пользователя
-    let user = await User.findOne({ email });
-    if (!user) {
-      return res.status(400).json({ msg: 'Неверные учетные данные' });
+  // Create a session for the user
+  req.session.userId = user._id;
+  req.session.role = user.role;
+
+  res.redirect('/'); // Redirect to the home page after successful login
+}
+
+// Logout function
+function logout(req, res) {
+  req.session.destroy((err) => {
+    if (err) {
+      return res.status(500).send('Failed to logout');
     }
 
-    // Проверка пароля
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      return res.status(400).json({ msg: 'Неверные учетные данные' });
-    }
+    res.redirect('/login'); // Redirect to the login page after logging out
+  });
+}
 
-    // Генерация JWT токена
-    const payload = {
-      user: {
-        id: user.id,
-      },
-    };
-    const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '1h' });
-
-    res.json({ token });
-
-  } catch (err) {
-    console.error(err.message);
-    res.status(500).send('Ошибка сервера');
-  }
-};
-
-// Получение данных пользователя (защищенный маршрут)
-exports.getUser = async (req, res) => {
-  try {
-    const user = await User.findById(req.user.id).select('-password');
-    res.json(user);
-  } catch (err) {
-    console.error(err.message);
-    res.status(500).send('Ошибка сервера');
-  }
+// Export the functions
+module.exports = {
+  register,
+  login,
+  logout,
 };
