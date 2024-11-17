@@ -1,52 +1,90 @@
-const User = require("../models/user");
-const sendEmail = require("../utils/sendEmail");
-const generate2FACode = require("../utils/2facode"); 
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
 
+// Модели пользователей (пример)
+const User = require('../models/user'); // Замените на вашу модель пользователя
+const JWT_SECRET = process.env.JWT_SECRET || 'Aa650652';  // Добавьте это в код
+
+// Регистрация нового пользователя
 exports.register = async (req, res) => {
-  const { username, password, firstName, lastName, age, gender, twoFactorAuth } = req.body;
-  try {
-    const twoFactorEnabled = twoFactorAuth ? true : false;
-    const twoFactorCode = generate2FACode(); 
+  const { username, email, password } = req.body;
 
-    const newUser = new User({
+  try {
+    // Проверка, существует ли пользователь
+    let user = await User.findOne({ email });
+    if (user) {
+      return res.status(400).json({ msg: 'Пользователь уже существует' });
+    }
+
+    // Хеширование пароля
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    // Создание нового пользователя
+    user = new User({
       username,
-      password,
-      firstName,
-      lastName,
-      age,
-      gender,
-      twoFactorEnabled,
-      twoFactorCode, 
+      email,
+      password: hashedPassword,
     });
 
-    await newUser.save();
-    await sendEmail(newUser.username, 'Your 2FA Code', `Your 2FA code is: ${twoFactorCode}`);
+    await user.save();
 
-    res.redirect('login');
-  } catch (error) {
-    console.error(error);
-    res.status(500).send("Error registering user");
+    // Генерация JWT токена
+    const payload = {
+      user: {
+        id: user.id,
+      },
+    };
+    const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '1h' });
+
+    res.json({ token });
+
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Ошибка сервера');
   }
 };
 
+// Вход пользователя
 exports.login = async (req, res) => {
-  const { username, password, twoFactorCode } = req.body;
+  const { email, password } = req.body;
+
   try {
-    const user = await User.findOne({ username });
-    if (!user || !(await user.comparePassword(password))) {
-      return res.status(401).send("Invalid credentials");
+    // Проверка пользователя
+    let user = await User.findOne({ email });
+    if (!user) {
+      return res.status(400).json({ msg: 'Неверные учетные данные' });
     }
 
-    if (user.twoFactorEnabled) {
-      if (twoFactorCode !== user.twoFactorCode) {
-        return res.status(401).send("Invalid 2FA code");
-      }
+    // Проверка пароля
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ msg: 'Неверные учетные данные' });
     }
 
-    req.session.user = user;
-    res.redirect("/"); 
-  } catch (error) {
-    console.error(error);
-    res.status(500).send("Error logging in");
+    // Генерация JWT токена
+    const payload = {
+      user: {
+        id: user.id,
+      },
+    };
+    const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '1h' });
+
+    res.json({ token });
+
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Ошибка сервера');
+  }
+};
+
+// Получение данных пользователя (защищенный маршрут)
+exports.getUser = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select('-password');
+    res.json(user);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Ошибка сервера');
   }
 };
