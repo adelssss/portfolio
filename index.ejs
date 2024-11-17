@@ -2,16 +2,16 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Seoul Portfolio</title>
+    <title>Tokyo Portfolio</title>
     <link rel="stylesheet" href="/css/style.css">
-    
+    <link rel="icon" href="/favicon.ico">
 </head>
 <body>
-    <h1>Welcome to Seoul City Portfolio</h1>
+    <h1>Welcome to Tokyo City Portfolio</h1>
 
-    <div>
+    <div class="portfolio-items">
         <% items.forEach(item => { %>
-            <div>
+            <div class="portfolio-item">
                 <h2><%= item.title %></h2>
                 <div class="carousel">
                     <% item.images.forEach(image => { %>
@@ -19,8 +19,8 @@
                     <% }) %>
                 </div>
                 <p><%= item.description %></p>
-                <p>Created: <%= item.createdAt %></p>
-                <p>Updated: <%= item.updatedAt %></p>
+                <p><strong>Created:</strong> <%= item.createdAt %></p>
+                <p><strong>Updated:</strong> <%= item.updatedAt %></p>
             </div>
         <% }) %>
     </div>
@@ -28,3 +28,4 @@
     <script src="/js/main.js"></script>
 </body>
 </html>
+
