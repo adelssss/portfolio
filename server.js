@@ -1,55 +1,33 @@
-require("dotenv").config(); 
-const express = require("express");
-const mongoose = require("mongoose");
-const session = require("express-session");
-const path = require("path");
-const expressLayouts = require("express-ejs-layouts");
+const express = require('express');
+const mongoose = require('mongoose');
+const session = require('express-session');
+const dotenv = require('dotenv');
+
+dotenv.config();
 
 const app = express();
 
-app.set("view engine", "ejs");
-app.set("views", path.join(__dirname, "views"));
+mongoose.connect(process.env.MONGODB_URI)
+  .then(() => console.log('Connected to MongoDB'))
+  .catch(err => console.log(err));
 
-app.use(expressLayouts);
-app.set("layout", "layout"); 
-
-const authRoutes = require("./routes/auth");
-const portfolioRoutes = require("./routes/portfolio");
-const connectDB = require("./config/db"); 
-
-connectDB();
-
-app.use(express.json());
+app.set('view engine', 'ejs');
 app.use(express.urlencoded({ extended: true }));
+app.use(express.static('public'));
 
-app.use(express.static(path.join(__dirname, "public")));
+app.use(session({
+  secret: process.env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: true
+}));
 
-app.use(
-  session({
-    secret: process.env.JWT_SECRET || "default_secret", 
-    resave: false,
-    saveUninitialized: true,
-    cookie: { secure: process.env.NODE_ENV === "production" }
-  })
-);
+// Import routes
+const authRoutes = require('./routes/authRoutes');
+const portfolioRoutes = require('./routes/portfolioRoutes');
 
-app.get("/", (req, res) => {
-  res.render("index", { title: "Home Page" });
-});
+app.use(authRoutes);
+app.use(portfolioRoutes);
 
-app.use("/auth", authRoutes);
-app.use("/portfolio", portfolioRoutes);
-
-app.use((req, res, next) => {
-  res.status(404).json({ error: "Page not found" });
-});
-
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({ error: "Internal Server Error" });
-});
-
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
+app.listen(3000, () => {
+  console.log('Server is running on http://localhost:3000');
 });
