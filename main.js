@@ -112,4 +112,4 @@ function handleError(errorMessage) {
   
   // Загружаем данные портфолио при инициализации страницы
   document.addEventListener('DOMContentLoaded', fetchPortfolioItems);
-   
+  
