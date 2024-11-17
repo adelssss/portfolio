@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Seoul Portfolio</title>
+    <link rel="stylesheet" href="/css/style.css">
+    
+</head>
+<body>
+    <h1>Welcome to Seoul City Portfolio</h1>
+
+    <div>
+        <% items.forEach(item => { %>
+            <div>
+                <h2><%= item.title %></h2>
+                <div class="carousel">
+                    <% item.images.forEach(image => { %>
+                        <img src="<%= image %>" alt="<%= item.title %>">
+                    <% }) %>
+                </div>
+                <p><%= item.description %></p>
+                <p>Created: <%= item.createdAt %></p>
+                <p>Updated: <%= item.updatedAt %></p>
+            </div>
+        <% }) %>
+    </div>
+
+    <script src="/js/main.js"></script>
+</body>
+</html>
