@@ -2,14 +2,15 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Seoul News</title>
+    <title>Tokyo News</title>
+    <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-    <h1>Latest News on Seoul</h1>
-    <ul>
+    <h1>Latest News on Tokyo</h1>
+    <ul class="news-list">
         <% articles.forEach(article => { %>
             <li>
-                <a href="<%= article.url %>"><%= article.title %></a>
+                <a href="<%= article.url %>" target="_blank"><%= article.title %></a>
                 <p><%= article.description %></p>
             </li>
         <% }) %>
