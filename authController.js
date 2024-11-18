@@ -1,6 +1,6 @@
 const bcrypt = require('bcryptjs');
 const nodemailer = require('nodemailer');
-const User = require('../models/user'); // Модель пользователя
+const User = require('../models/user'); 
 const session = require('express-session');
 
 // Function for registering a user
@@ -72,7 +72,7 @@ async function login(req, res) {
     return res.status(400).send('Invalid username or password');
   }
 
-  // Check for failed login attempts
+  
   if (user.failedLoginAttempts >= 3) {
     return res.status(403).send('Your account is locked due to too many failed login attempts');
   }
@@ -109,7 +109,6 @@ function logout(req, res) {
   });
 }
 
-// Export the functions
 module.exports = {
   register,
   login,
