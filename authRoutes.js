@@ -4,31 +4,25 @@ const bcrypt = require('bcryptjs');
 const nodemailer = require('nodemailer');
 const User = require('../models/user');
 
-// Страница регистрации (GET запрос)
 router.get('/register', (req, res) => {
-  res.render('register'); // Отправляем форму для регистрации
+  res.render('register');
 });
 
-// Обработчик регистрации (POST запрос)
 router.post('/register', async (req, res) => {
   const { username, password, firstName, lastName, age, gender } = req.body;
 
-  // Проверка на пустые поля
   if (!username || !password || !firstName || !lastName || !age || !gender) {
-    return res.render('register', { errorMessage: 'Все поля обязательны для заполнения' });
+    return res.render('register', { errorMessage: 'All fields are required' });
   }
 
   try {
-    // Проверяем, если пользователь уже существует
     const existingUser = await User.findOne({ username });
     if (existingUser) {
-      return res.render('register', { errorMessage: 'Пользователь с таким именем уже существует' });
+      return res.render('register', { errorMessage: 'User with this username already exists' });
     }
 
-    // Хешируем пароль
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Создаем нового пользователя
     const newUser = new User({
       username,
       password: hashedPassword,
@@ -36,14 +30,12 @@ router.post('/register', async (req, res) => {
       lastName,
       age,
       gender,
-      role: 'editor', // По умолчанию роль - редактор
-      failedLoginAttempts: 0, // Начальное количество неудачных попыток
+      role: 'editor',
+      failedLoginAttempts: 0,
     });
 
-    // Сохраняем нового пользователя
     await newUser.save();
 
-    // Отправка welcome email с использованием Nodemailer
     const transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
@@ -67,37 +59,31 @@ router.post('/register', async (req, res) => {
       }
     });
 
-    res.redirect('/login'); // После успешной регистрации перенаправляем на страницу входа
+    res.redirect('/login');
   } catch (error) {
     console.error('Error during registration:', error);
-    res.status(500).render('register', { errorMessage: 'Произошла ошибка при регистрации' });
+    res.status(500).render('register', { errorMessage: 'An error occurred during registration' });
   }
 });
 
-// Страница логина (GET запрос)
 router.get('/login', (req, res) => {
-  res.render('login'); // Отправляем форму для логина
+  res.render('login');
 });
 
-// Обработчик логина (POST запрос)
 router.post('/login', async (req, res) => {
   const { username, password } = req.body;
 
-  // Проверка на пустые поля
   if (!username || !password) {
-    return res.render('login', { errorMessage: 'Логин и пароль обязательны для ввода' });
+    return res.render('login', { errorMessage: 'Login and password are required' });
   }
 
   try {
-    // Находим пользователя по имени
     const user = await User.findOne({ username });
     if (!user) {
-      return res.render('login', { errorMessage: 'Неверный логин или пароль' });
+      return res.render('login', { errorMessage: 'Invalid username or password' });
     }
 
-    // Проверка на превышение количества неудачных попыток
     if (user.failedLoginAttempts >= 3) {
-      // Отправка уведомления об увеличении неудачных попыток
       const transporter = nodemailer.createTransport({
         service: 'gmail',
         auth: {
@@ -108,7 +94,7 @@ router.post('/login', async (req, res) => {
 
       const mailOptions = {
         from: process.env.EMAIL_USER,
-        to: process.env.EMAIL_USER, // Админ или безопасность
+        to: process.env.EMAIL_USER,
         subject: 'Warning: Multiple Failed Login Attempts',
         text: `There have been multiple failed login attempts for the user: ${username}.`,
       };
@@ -121,35 +107,29 @@ router.post('/login', async (req, res) => {
         }
       });
 
-      return res.render('login', { errorMessage: 'Ваша учетная запись заблокирована из-за слишком большого количества неудачных попыток входа' });
+      return res.render('login', { errorMessage: 'Your account is locked due to too many failed login attempts' });
     }
 
-    // Сравниваем пароли
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      // Увеличиваем количество неудачных попыток
       user.failedLoginAttempts += 1;
       await user.save();
-      return res.render('login', { errorMessage: 'Неверный логин или пароль' });
+      return res.render('login', { errorMessage: 'Invalid username or password' });
     }
 
-    // Если все верно, сбрасываем количество неудачных попыток
     user.failedLoginAttempts = 0;
     await user.save();
 
-    // Если все верно, создаем сессию
     req.session.userId = user._id;
     req.session.role = user.role;
 
-    // Перенаправляем на главную страницу
     res.redirect('/');
   } catch (error) {
     console.error('Error during login:', error);
-    res.status(500).render('login', { errorMessage: 'Произошла ошибка при входе' });
+    res.status(500).render('login', { errorMessage: 'An error occurred during login' });
   }
 });
 
-// Логаут (GET запрос)
 router.get('/logout', (req, res) => {
   req.session.destroy((err) => {
     if (err) {
@@ -157,7 +137,7 @@ router.get('/logout', (req, res) => {
       return res.status(500).send('Failed to logout');
     }
 
-    res.redirect('/login'); // Перенаправляем на страницу логина после логаута
+    res.redirect('/login');
   });
 });
 
