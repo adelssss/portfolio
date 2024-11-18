@@ -1,28 +1,29 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Регистрация - Portfolio Platform</title>
-    <link rel="stylesheet" href="/css/style.css"> <!-- Подключение основного файла стилей -->
+    <title>Registration - Portfolio Platform</title>
+    <link rel="stylesheet" href="/css/style.css"> 
 </head>
 <body>
 
-<!-- Навигационная панель -->
+
 <header>
-    <nav class="navbar">
-        <div class="navbar-container">
-            <a href="/">Главная</a>
-            <ul class="nav-links">
-                <li><a href="/login">Войти</a></li>
-                <li><a href="/register">Регистрация</a></li>
-            </ul>
-        </div>
-    </nav>
+  <nav class="navbar">
+      <div class="navbar-container">
+          <a href="/">Registration</a>
+          <ul class="nav-links">
+              <li><a href="/login">Login</a></li>
+              <li><a href="/news">News</a></li>
+              <li><a href="/portfolio">Portfolio</a></li>
+          </ul>
+      </div>
+  </nav>
 </header>
 
-<!-- Форма для регистрации -->
-<h1>Регистрация на платформе</h1>
+
+<h1>Registration on the Platform</h1>
 <form action="/register" method="POST" class="form" id="registerForm">
     <label for="username">Username:</label>
     <input type="text" name="username" id="username" required><br>
@@ -45,11 +46,11 @@
       <option value="female">Female</option>
     </select><br>
 
-    <button type="submit">Зарегистрироваться</button>
+    <button type="submit">Register</button>
 </form>
 
 <script>
-// Валидация формы перед отправкой
+// Form validation before submission
 document.getElementById('registerForm').addEventListener('submit', function(event) {
     const username = document.getElementById('username').value;
     const password = document.getElementById('password').value;
@@ -58,18 +59,18 @@ document.getElementById('registerForm').addEventListener('submit', function(even
     const age = document.getElementById('age').value;
     const gender = document.getElementById('gender').value;
 
-    // Проверка на минимальную длину пароля (например, 6 символов)
+    // Check for minimum password length (e.g., 6 characters)
     if (password.length < 6) {
-        alert('Пароль должен содержать хотя бы 6 символов');
-        event.preventDefault(); // Отменяем отправку формы
+        alert('Password must be at least 6 characters long');
+        event.preventDefault(); // Prevent form submission
         return;
     }
 
-    // Дополнительные проверки можно добавить по аналогии
-
-    // Если все поля валидны, форма будет отправлена
+   
 });
 </script>
 
 </body>
 </html>
+
+
